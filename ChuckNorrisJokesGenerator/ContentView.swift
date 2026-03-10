@@ -9,25 +9,30 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = JokeViewModel()
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            colorScheme == .dark ? Color.black.ignoresSafeArea() : Color.white.ignoresSafeArea()
             
             VStack(spacing: 30) {
-                Text("💪 Chuck Norris")
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
+                Image("chucknorris_logo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 300)
+                    .padding(.top, -40)
                 
-                Text("Joke Generator")
-                    .font(.title2)
-                    .foregroundColor(.orange)
+                Text("Chuck Norris Joke Generator")
+                    .multilineTextAlignment(.center)
+                    .font(.title)
+                    .bold()
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
                 
                 Spacer()
                 
                 ZStack {
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(.white.opacity(0.1))
+                        .fill(colorScheme == .dark ? .white.opacity(0.1) : .black.opacity(0.1))
                         .overlay(
                             RoundedRectangle(cornerRadius: 20)
                                 .stroke(.orange, lineWidth: 1.5)
@@ -40,7 +45,7 @@ struct ContentView: View {
                     } else {
                         Text(viewModel.errorMessage ?? viewModel.joke)
                             .font(.title3)
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
                             .multilineTextAlignment(.center)
                             .padding(24)
                     }
@@ -57,7 +62,7 @@ struct ContentView: View {
                 }, label: {
                     Label("Get a Joke", systemImage: "bolt.fill")
                         .font(.headline)
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .dark ? .black : .white)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(.orange)
