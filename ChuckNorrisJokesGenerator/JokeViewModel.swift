@@ -13,13 +13,11 @@ class JokeViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     
-    private let baseURL = "https://api.chucknorris.io/jokes/random"
-    
     func fetchJoke() async {
         isLoading = true
         errorMessage = nil
         
-        guard let url = URL(string: baseURL) else {
+        guard let url = URL(string: APIConstants.baseURL + APIConstants.randomPath) else {
             return
         }
         
@@ -33,4 +31,10 @@ class JokeViewModel: ObservableObject {
         
         isLoading = false
     }
+}
+
+enum APIConstants {
+    static let baseURL = "https://api.chucknorris.io/"
+    static let randomPath = "jokes/random"
+    static let imagePath = "img/avatar/chuck-norris.png"
 }
