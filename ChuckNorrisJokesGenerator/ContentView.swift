@@ -53,7 +53,92 @@ struct ContentView: View {
                 .frame(minHeight: 200)
                 .padding(.horizontal)
                 
-                Spacer()
+                HStack {
+                    Text("Category:")
+                    
+                    Picker("Category", selection: $viewModel.selectedCategory) {
+                        ForEach(viewModel.categoriesList, id: \.self) { category in
+                            Text(category.capitalized).tag(category)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(.orange)
+                    .disabled(viewModel.categoriesList.isEmpty)
+                    .overlay {
+                        if viewModel.categoriesList.isEmpty {
+                            ProgressView().tint(.orange)
+                        }
+                    }
+                }
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        let allCategories = viewModel.categoriesList
+
+                        ForEach(allCategories, id: \.self) { category in
+                            let isSelected = viewModel.selectedCategory == category
+                            let label = category == "random" ? "Random" : category.capitalized
+
+                            Text(label)
+                                .font(.subheadline.weight(isSelected ? .bold : .regular))
+                                .foregroundColor(isSelected ? .black : .orange)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(
+                                    Capsule()
+                                        .fill(isSelected ? Color.orange : Color.clear)
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.orange, lineWidth: 1.5)
+                                )
+                                .onTapGesture {
+                                    withAnimation(.spring()) {
+                                        viewModel.selectedCategory = category
+                                    }
+                                }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .frame(height: 44)
+                .overlay {
+                    if viewModel.categoriesList.isEmpty {
+                        ProgressView().tint(.orange)
+                    }
+                }
+                
+                Menu {
+                    Picker("Category", selection: $viewModel.selectedCategory) {
+                        //Text("Random").tag("random")
+                        ForEach(viewModel.categoriesList, id: \.self) { category in
+                            Text(category.capitalized).tag(category)
+                        }
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "list.bullet")
+                        Text(viewModel.selectedCategory == "random"
+                             ? "Random"
+                             : viewModel.selectedCategory.capitalized)
+                        Spacer()
+                        Image(systemName: "chevron.down")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.orange, lineWidth: 1.5)
+                            )
+                    )
+                    .padding(.horizontal)
+                }
+                .disabled(viewModel.categoriesList.isEmpty)
                 
                 Button(action: {
                     Task {
@@ -72,6 +157,9 @@ struct ContentView: View {
                 .disabled(viewModel.isLoading)
             }
             .padding(.vertical, 40)
+        }
+        .task {
+            await viewModel.fetchCategories()
         }
     }
 }
