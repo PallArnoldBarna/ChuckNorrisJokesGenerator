@@ -9,89 +9,43 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = JokeViewModel()
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.colorScheme) public var colorScheme
     
     var body: some View {
         ZStack {
             colorScheme == .dark ? Color.black.ignoresSafeArea() : Color.white.ignoresSafeArea()
             
             VStack(spacing: 30) {
-                Image("chucknorris_logo")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 300)
-                    .padding(.top, -40)
+                Image(Strings.Image.logoImage)
+                    .logoStyle()
                 
-                Text("Chuck Norris Joke Generator")
-                    .multilineTextAlignment(.center)
-                    .font(.title)
-                    .bold()
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
-                
-                Spacer()
+                Text(Strings.Text.titleText)
+                    .titleStyle(colorScheme: colorScheme)
                 
                 ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(colorScheme == .dark ? .white.opacity(0.1) : .black.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(.orange, lineWidth: 1.5)
-                        )
-                    
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .tint(.orange)
-                            .scaleEffect(1.5)
-                    } else {
-                        Text(viewModel.errorMessage ?? viewModel.joke)
-                            .font(.title3)
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
-                            .multilineTextAlignment(.center)
-                            .padding(24)
-                    }
-                }
-                .frame(minHeight: 200)
-                .padding(.horizontal)
-                
-                HStack {
-                    Text("Category:")
-                    
-                    Picker("Category", selection: $viewModel.selectedCategory) {
-                        ForEach(viewModel.categoriesList, id: \.self) { category in
-                            Text(category.capitalized).tag(category)
+                    Rectangle()
+                        .jokeBoxStyle(colorScheme: colorScheme)
+                    ScrollView(showsIndicators: false) {
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .progressViewStyle()
+                        } else {
+                            Text(viewModel.errorMessage ?? viewModel.joke)
+                                .jokeBoxTextStyle(colorScheme: colorScheme)
                         }
                     }
-                    .pickerStyle(.menu)
-                    .tint(.orange)
-                    .disabled(viewModel.categoriesList.isEmpty)
-                    .overlay {
-                        if viewModel.categoriesList.isEmpty {
-                            ProgressView().tint(.orange)
-                        }
-                    }
+                    .jokeBoxScrollViewStyle()
                 }
+                .jokeBoxSize()
                 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
-                        let allCategories = viewModel.categoriesList
-
-                        ForEach(allCategories, id: \.self) { category in
+                        ForEach(viewModel.categoriesList, id: \.self) { category in
                             let isSelected = viewModel.selectedCategory == category
-                            let label = category == "random" ? "Random" : category.capitalized
+                            let label = category == Strings.Text.randomText ? Strings.Text.randomText.capitalized : category.capitalized
 
                             Text(label)
-                                .font(.subheadline.weight(isSelected ? .bold : .regular))
-                                .foregroundColor(isSelected ? .black : .orange)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 8)
-                                .background(
-                                    Capsule()
-                                        .fill(isSelected ? Color.orange : Color.clear)
-                                )
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color.orange, lineWidth: 1.5)
-                                )
+                                .categoryTextStyle(isSelected: isSelected)
                                 .onTapGesture {
                                     withAnimation(.spring()) {
                                         viewModel.selectedCategory = category
@@ -101,60 +55,18 @@ struct ContentView: View {
                     }
                     .padding(.horizontal)
                 }
-                .frame(height: 44)
-                .overlay {
-                    if viewModel.categoriesList.isEmpty {
-                        ProgressView().tint(.orange)
-                    }
-                }
-                
-                Menu {
-                    Picker("Category", selection: $viewModel.selectedCategory) {
-                        //Text("Random").tag("random")
-                        ForEach(viewModel.categoriesList, id: \.self) { category in
-                            Text(category.capitalized).tag(category)
-                        }
-                    }
-                } label: {
-                    HStack {
-                        Image(systemName: "list.bullet")
-                        Text(viewModel.selectedCategory == "random"
-                             ? "Random"
-                             : viewModel.selectedCategory.capitalized)
-                        Spacer()
-                        Image(systemName: "chevron.down")
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.orange)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.white.opacity(0.1))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.orange, lineWidth: 1.5)
-                            )
-                    )
-                    .padding(.horizontal)
-                }
-                .disabled(viewModel.categoriesList.isEmpty)
+                .categoryScrollViewStyle(isEmpty: viewModel.categoriesList.isEmpty)
                 
                 Button(action: {
                     Task {
                         await viewModel.fetchJoke()
                     }
                 }, label: {
-                    Label("Get a Joke", systemImage: "bolt.fill")
-                        .font(.headline)
-                        .foregroundColor(colorScheme == .dark ? .black : .white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.orange)
-                        .cornerRadius(14)
-                        .padding(.horizontal)
+                    Label(Strings.Text.buttonText, systemImage: Strings.Image.buttonImage)
+                        .buttonLabelStyle(colorScheme: colorScheme)
                 })
                 .disabled(viewModel.isLoading)
+                
             }
             .padding(.vertical, 40)
         }
