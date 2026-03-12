@@ -9,21 +9,21 @@ import Foundation
 import Combine
 
 class JokeViewModel: ObservableObject {
-    @Published var joke: String = "Tap the button to get a Chuck Norris joke!"
+    @Published var joke: String = Strings.Text.jokePlaceholderText
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
-    @Published var selectedCategory: String = "random"
-    @Published var categoriesList: [String] = ["random"]
+    @Published var selectedCategory: String = Strings.Text.randomText
+    @Published var categoriesList: [String] = [Strings.Text.randomText]
     
     func fetchJoke() async {
         isLoading = true
         errorMessage = nil
         
         let urlString: String
-        if selectedCategory == "random" {
-            urlString = APIConstants.baseURL + APIConstants.randomPath
+        if selectedCategory == Strings.Text.randomText {
+            urlString = Strings.APIConstants.baseURL + Strings.APIConstants.randomPath
         } else {
-            urlString = APIConstants.baseURL + APIConstants.categoryPath + selectedCategory
+            urlString = Strings.APIConstants.baseURL + Strings.APIConstants.categoryPath + selectedCategory
         }
         
         guard let jokeURL = URL(string: urlString) else {
@@ -35,14 +35,14 @@ class JokeViewModel: ObservableObject {
             let decoded = try JSONDecoder().decode(ChuckNorrisJoke.self, from: data)
             joke = decoded.value
         } catch {
-            errorMessage = "Failed to load joke. Try again!"
+            errorMessage = Strings.Text.fetchJokeError
         }
         
         isLoading = false
     }
     
     func fetchCategories() async {
-        guard let categoriesURL = URL(string: APIConstants.baseURL + APIConstants.categoriesPath) else {
+        guard let categoriesURL = URL(string: Strings.APIConstants.baseURL + Strings.APIConstants.categoriesPath) else {
             return
         }
         
@@ -51,14 +51,7 @@ class JokeViewModel: ObservableObject {
             let decoded = try JSONDecoder().decode([String].self, from: data)
             categoriesList.append(contentsOf: decoded)
         } catch {
-            errorMessage = "Failed to load categories."
+            errorMessage = Strings.Text.fetchCategoriesError
         }
     }
-}
-
-enum APIConstants {
-    static let baseURL = "https://api.chucknorris.io/"
-    static let randomPath = "jokes/random"
-    static let categoryPath = "jokes/random?category="
-    static let categoriesPath = "jokes/categories"
 }
