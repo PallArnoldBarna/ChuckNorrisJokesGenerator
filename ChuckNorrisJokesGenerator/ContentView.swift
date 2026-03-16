@@ -16,8 +16,12 @@ struct ContentView: View {
             colorScheme == .dark ? Color.black.ignoresSafeArea() : Color.white.ignoresSafeArea()
             
             VStack(spacing: 30) {
-                Image(Strings.Image.logoImage)
-                    .logoStyle()
+                if let imageURL = URL(string: Strings.APIConstants.baseURL) {
+                    Link(destination: imageURL) {
+                        Image(Strings.Image.logoImage)
+                            .logoStyle()
+                    }
+                }
                 
                 Text(Strings.Text.titleText)
                     .titleStyle(colorScheme: colorScheme)
